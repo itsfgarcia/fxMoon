@@ -1,28 +1,36 @@
 import discord
 from discord.ext import commands
+import os
+from dotenv import load_dotenv
 
-TOKEN = 'MTE4OTk2MDE0NTk1MDc0ODc1Mg.GjA09u.Ta5WCoL1otb86z4wI_XhNN1jZO17Vrc40IgUMI'
+# Load environment variables from .env file
+load_dotenv()
+
+# Retrieve the bot token from the environment variable
+TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 bot = commands.Bot(command_prefix='!')
 
 @bot.event
+async def on_ready():
+    print(f'Connected as {bot.user.name}')
+
+@bot.event
 async def on_message(message):
-    
-    # By using this if statement, we prevent the bot from responding to its own messages, thus avoiding infinite loops.
+    # Avoid the bot responding to its own messages to prevent infinite loops
     if message.author == bot.user:
         return
     
-    # We'll ensure that the bot only performs its actions when users send messages starting with 'https://twitter.com' or 'https://x.com'.
-    
+    # Ensure that the bot only performs actions when users send messages starting with 'https://twitter.com' or 'https://x.com/'.
     if message.content.startswith(('https://twitter.com/', 'https://x.com/')):
-        # We replace the part of the message with 'https://twitter.com' or 'https://x.com' with 'https://fxtwitter.com', ensuring embedded tweets display correctly in Discord.
+        # Replace the part of the message with 'https://twitter.com/' or 'https://x.com/' with 'https://fxtwitter.com/', ensuring embedded tweets display correctly in Discord.
         finalMessage = message.content.replace('https://twitter.com/', 'https://fxtwitter.com').replace('https://x.com/', 'https://fxtwitter.com')
         
-        # And send back the new message to the same Discord channel from which the original message was sent.
+        # Send back the new message to the same Discord channel from which the original message was sent.
         await message.channel.send(finalMessage)
         
-    # To allow other message events to work correctly with the bot:
-    
+    # Allow other message events to work correctly with the bot:
     await bot.process_commands(message)
-    
+
+# Run the bot with the token retrieved from the environment variable
 bot.run(TOKEN)
